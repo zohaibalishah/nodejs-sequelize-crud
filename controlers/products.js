@@ -1,8 +1,12 @@
-const Product = require("../models/products");
-
+const {Product} = require("../models");
+const {QueryTypes}=require("sequelize")
+const sequelize=require("../config/db")
 const productsList = async (req, res, next) => {
   try {
-    const products = await Product.findAll();
+    // const products =  await sequelize.query("select * from users",{type:QueryTypes.SELECT})
+    const products = await Product.findAll({
+      // paranoid: false
+    });
     return res.status(200).json({ msg: "list", products });
   } catch (err) {
     return res.status(500).send({ err });
@@ -11,11 +15,12 @@ const productsList = async (req, res, next) => {
 const productsAdd = async (req, res, next) => {
   try {
     const data = req.body;
+    data['id']=1
     const product = new Product(data);
     await product.save();
     return res.status(200).json({ msg: "add", product });
   } catch (err) {
-    return res.status(500).send("Server Error!");
+    return res.status(500).json({err});
   }
 };
 const productsById = async (req, res, next) => {
@@ -49,6 +54,7 @@ const ProductsDelete = async (req, res, next) => {
       where: {
         id: productId,
       },
+      // force:true
     });
     return res.status(200).json({ msg: "delete product", productId, result });
   } catch (err) {
